@@ -11,8 +11,8 @@ var authors = "Gilles-Philippe Paillé";
 var version = 1;
 
 var currency;
-var c1, c2;
-var c1Exp, c2Exp;
+var c1, c2, a1, a2;
+var c1Exp, c2Exp, a1Exp;
 
 var achievement1, achievement2;
 var chapter1, chapter2;
@@ -40,28 +40,43 @@ var init = () => {
         c2.getInfo = (amount) => Utils.getMathTo(getInfo(c2.level), getInfo(c2.level + amount));
     }
 
+    // a1
+    {
+        let getDesc = (level) => "a_1=" + getC1(level).toString(0);
+        c1 = theory.createUpgrade(0, currency, new FirstFreeCost(new ExponentialCost(15, Math.log2(7.7))));
+        a1.getDescription = (_) => Utils.getMath(getDesc(a1.level));
+        a1.getInfo = (amount) => Utils.getMathTo(getInfo(a1.level), getInfo(a1.level + amount));
+    }
+
     /////////////////////
     // Permanent Upgrades
-    theory.createPublicationUpgrade(0, currency, 1e10);
-    theory.createBuyAllUpgrade(1, currency, 1e13);
-    theory.createAutoBuyerUpgrade(2, currency, 1e30);
+    theory.createPublicationUpgrade(0, currency, 7.56e11);
+    theory.createBuyAllUpgrade(1, currency, 3.78e29);
+    theory.createAutoBuyerUpgrade(2, currency, 1.89e47);
 
     ///////////////////////
     //// Milestone Upgrades
-    theory.setMilestoneCost(new LinearCost(25, 25));
+    theory.setMilestoneCost(new LinearCost(16, 40));
 
     {
         c1Exp = theory.createMilestoneUpgrade(0, 3);
-        c1Exp.description = Localization.getUpgradeIncCustomExpDesc("c_1", "0.05");
-        c1Exp.info = Localization.getUpgradeIncCustomExpInfo("c_1", "0.05");
+        c1Exp.description = Localization.getUpgradeIncCustomExpDesc("c_1", "0.03");
+        c1Exp.info = Localization.getUpgradeIncCustomExpInfo("c_1", "0.03");
         c1Exp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
     }
 
     {
         c2Exp = theory.createMilestoneUpgrade(1, 3);
-        c2Exp.description = Localization.getUpgradeIncCustomExpDesc("c_2", "0.05");
-        c2Exp.info = Localization.getUpgradeIncCustomExpInfo("c_2", "0.05");
+        c2Exp.description = Localization.getUpgradeIncCustomExpDesc("c_2", "0.03");
+        c2Exp.info = Localization.getUpgradeIncCustomExpInfo("c_2", "0.03");
         c2Exp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
+    }
+
+    {
+        a1Exp = theory.createMilestoneUpgrade(1, 3);
+        a1Exp.description = Localization.getUpgradeIncCustomExpDesc("a_1", "0.03");
+        a1Exp.info = Localization.getUpgradeIncCustomExpInfo("a_1", "0.03");
+        a1Exp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
     }
     
     /////////////////
@@ -91,22 +106,28 @@ var tick = (elapsedTime, multiplier) => {
 var getPrimaryEquation = () => {
     let result = "\\dot{\\rho} = c_1";
 
-    if (c1Exp.level == 1) result += "^{1.05}";
-    if (c1Exp.level == 2) result += "^{1.1}";
-    if (c1Exp.level == 3) result += "^{1.15}";
+    if (c1Exp.level == 1) result += "^{1.03}";
+    if (c1Exp.level == 2) result += "^{1.06}";
+    if (c1Exp.level == 3) result += "^{1.09}";
 
     result += "c_2";
 
-    if (c2Exp.level == 1) result += "^{1.05}";
-    if (c2Exp.level == 2) result += "^{1.1}";
-    if (c2Exp.level == 3) result += "^{1.15}";
+    if (c2Exp.level == 1) result += "^{1.03}";
+    if (c2Exp.level == 2) result += "^{1.06}";
+    if (c2Exp.level == 3) result += "^{1.09}";
+    
+    result += "a_1";
+
+    if (a1Exp.level == 1) result += "^{1.03}";
+    if (a1Exp.level == 2) result += "^{1.06}";
+    if (a1Exp.level == 3) result += "^{1.09}";
 
     return result;
 }
 
 var getSecondaryEquation = () => theory.latexSymbol + "=\\max\\rho";
-var getPublicationMultiplier = (tau) => tau.pow(0.164) / BigNumber.THREE;
-var getPublicationMultiplierFormula = (symbol) => "\\frac{{" + symbol + "}^{0.164}}{3}";
+var getPublicationMultiplier = (tau) => tau.pow(0.09) / BigNumber.THREE;
+var getPublicationMultiplierFormula = (symbol) => "\\frac{{" + symbol + "}^{0.090}}{3}";
 var getTau = () => currency.value;
 var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
 
